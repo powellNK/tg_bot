@@ -15,7 +15,7 @@ public class UserService {
 
     public UserService(UserRepository userRepository, ParserService parserService) {
         this.userRepository = userRepository;
-        this.parserService = parserService;
+        this.parserService = this.parserService;
     }
 
     private boolean isUserExists(long telegramId) {

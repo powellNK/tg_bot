@@ -1,66 +1,11 @@
-CREATE OR REPLACE FUNCTION update_team_ids()
-        RETURNS TRIGGER AS $$
-        BEGIN
-        -- Установка team1_id на основе team1_title
-        NEW.team1_id := (SELECT team_id FROM teams WHERE team_title = NEW.team1_title);
+package handlers;
 
-        -- Если team1_title не найден, выброс исключения
-        IF NEW.team1_id IS NULL THEN
-        RAISE EXCEPTION 'Team title "%" not found in teams table for team1', NEW.team1_title;
-        END IF;
-
-        -- Установка team2_id на основе team2_title
-        NEW.team2_id := (SELECT team_id FROM teams WHERE team_title = NEW.team2_title);
-
-        -- Если team2_title не найден, выброс исключения
-        IF NEW.team2_id IS NULL THEN
-        RAISE EXCEPTION 'Team title "%" not found in teams table for team2', NEW.team2_title;
-        END IF;
-
-        RETURN NEW;
-        END;
-        $$ LANGUAGE plpgsql;
-
-
-        CREATE TRIGGER trg_update_team_ids
-        BEFORE INSERT OR UPDATE ON games
-        FOR EACH ROW
-        EXECUTE FUNCTION update_team_ids();
-
-
-
-
-        package handlers;
-
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
-import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.message.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.generics.TelegramClient;
-import secrets.SecretManager;
-import services.ParserService;
 import services.UserService;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@Slf4j
-public class MessageHandler implements LongPollingSingleThreadUpdateConsumer {
+public class MessageHandler  implements LongPollingSingleThreadUpdateConsumer {
     private final TelegramClient client = new OkHttpTelegramClient(SecretManager.getToken());
     private final Logger logger = LoggerFactory.getLogger(MessageHandler.class);
     private final UserService userService;
-    private final ParserService parserService;
-
-
     private static final String YEAR2023 = "2023";
     private static final String YEAR2024 = "2024";
     private static final String SHOW_ALL_GAMES = "SHOW_ALL_GAMES";
@@ -74,9 +19,8 @@ public class MessageHandler implements LongPollingSingleThreadUpdateConsumer {
     private static final String ALL_USERS = "ALL_USERS";
 
 
-    public MessageHandler(UserService userService, ParserService parserService) {
+    public MessageHandler(UserService userService) {
         this.userService = userService;
-        this.parserService = parserService;
     }
 
 
@@ -233,19 +177,4 @@ private void sendMessage(Long telegramId, String text) {
 }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        }

@@ -26,9 +26,10 @@ public class DbManager {
     public DbManager() {
         this.connection = DbConnectionFactory.createConnection();
         this.userRepository = new UserRepository(connection);
-        this.userService = new UserService(userRepository, parserService);
+
         this.parserRepository = new ParserRepository(connection);
         this.parserService = new ParserService(parserRepository);
+        this.userService = new UserService(userRepository, parserService);
         this.messageHandler = new MessageHandler(userService);
         log.info("DbManager initialized with UserService and UserRepository.");
     }

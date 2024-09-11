@@ -53,12 +53,10 @@ public class ParserService {
             parsingGames(URL2024, CSS_GAMES2024, 2024, lastUpdate);
             parsingPlayers(2024);
             parsingTeams(URL2025, CSS_TEAMS2025);
-            parsingGames(URL2025, CSS_GAMES2025, 2025, lastUpdate);
-            parsingPlayers(2025);
-        } else {
-            parsingGames(URL2025, CSS_GAMES2025, 2025, lastUpdate);
-            parsingPlayers(2025);
         }
+        parsingGames(URL2025, CSS_GAMES2025, 2025, lastUpdate);
+        parsingPlayers(2025);
+
         LastUpdateParsingProperties.saveLastUpdate(LocalDateTime.now());
     }
 
@@ -84,10 +82,6 @@ public class ParserService {
     private void parsingPlayers(int season) {
         for (int i = 0; i < teamHrefMap.size(); i++) {
             String url = teamHrefMap.get(i);
-            if (url == null || url.trim().isEmpty()) {
-                System.err.println("URL for team index " + i + " is empty or null");
-                continue;
-            }
             try {
                 Document document = Jsoup.connect(url).get();
                 Elements players = document.select("#index-0 > div > a.team-card > div");
@@ -108,7 +102,7 @@ public class ParserService {
                     playerService.createPlayer(fio, age, gameNumber, height, i, role, season);
                 }
             } catch (IOException e) {
-                System.err.println("Error fetching or parsing the URL: " + url);
+                System.err.println(STR."Ошибка при получении ссылки: \{url}");
                 logger.error(e.getMessage());
             }
         }
@@ -127,8 +121,8 @@ public class ParserService {
     private void parsingGames(String url, String cssGames, int season, LocalDateTime lastUpdate) throws IOException {
         Document document = Jsoup.connect(url).get();
         Elements elements = document.select(cssGames);
-        for (int i = 0; i < elements.size(); i++) {
-            Elements game = elements.get(i).select("td");
+        for (Element element : elements) {
+            Elements game = element.select("td");
             String dateTimePart = STR."\{game.get(DATE_INDEX).text()} \{game.get(TIME_INDEX).text().substring(0, 5)}";
             LocalDateTime dateTime = getFormattedDateTime(dateTimePart);
             if (lastUpdate != null && lastUpdate.minusHours(3).isBefore(dateTime)) {
@@ -148,13 +142,11 @@ public class ParserService {
                 continue;
             }
 
-            String resultPoints = "";
-            String resultSet = "";
             Elements result = game.get(SCORES_INDEX).select("div > span");
             String resultText = result.text().trim();
             if (!resultText.isEmpty()) {
-                resultSet = result.get(SCORES_POINT_INDEX).text();
-                resultPoints = result.get(SCORES_SET_INDEX).text();
+                String resultSet = result.get(SCORES_POINT_INDEX).text();
+                String resultPoints = result.get(SCORES_SET_INDEX).text();
 
                 int[] pointsScores = getNumbersFromString(resultPoints);
                 int[] setScores = getNumbersFromString(resultSet);

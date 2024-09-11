@@ -8,7 +8,12 @@ import lombok.Setter;
 @Setter
 @Builder
 public class Player {
-    private int id;
     private String fio;
-    private int team_id;
+    private int age;
+    private int gameNumber;
+    private int height;
+    private String role;
+    private short team_id;
+    private String teamTitle;
+    private int season;
 }

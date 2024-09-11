@@ -24,7 +24,7 @@ public class UserRepository {
             ResultSet resultSet = statement.executeQuery();
             return resultSet.next();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
         return false;
     }
@@ -38,7 +38,7 @@ public class UserRepository {
                 return resultSet.getBoolean("role_admin");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
         return false;
     }
@@ -48,10 +48,11 @@ public class UserRepository {
             final PreparedStatement preparedStatement = connection.prepareStatement(UserQueries.CREATE_NEW_USER);
 
             preparedStatement.setLong(1, user.getTelegramId());
+            preparedStatement.setString(2, user.getTelegramUsername());
             preparedStatement.execute();
 
         } catch (SQLException e) {
-            log.error(e.getMessage());
+            logger.error(e.getMessage());
         }
     }
 }

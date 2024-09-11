@@ -1,37 +1,45 @@
 package infrastructure.Db;
 
 import handlers.MessageHandler;
-import infrastructure.Db.repositories.ParserRepository;
-import infrastructure.Db.repositories.UserRepository;
+import infrastructure.Db.repositories.*;
 import infrastructure.configuration.DbConnectionFactory;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import services.ParserService;
-import services.UserService;
+import services.*;
 
 import java.sql.Connection;
 
 public class DbManager {
+    private final GameRepository gameRepository;
+    private final TeamRepository teamRepository;
+    private final TeamService teamService;
+    private final PlayerRepository playerRepository;
+    private final PlayerService playerService;
     private Connection connection;
-    private final Logger log = LoggerFactory.getLogger(DbManager.class);
+    private final Logger logger = LoggerFactory.getLogger(DbManager.class);
 
     private UserRepository userRepository;
     @Getter
     private UserService userService;
     private MessageHandler messageHandler;
     private ParserService parserService;
-    private ParserRepository parserRepository;
+    private GameService gameService;
     ;
     public DbManager() {
         this.connection = DbConnectionFactory.createConnection();
-        this.userRepository = new UserRepository(connection);
+        this.gameRepository = new GameRepository(connection);
+        this.gameService = new GameService(gameRepository);
+        this.teamRepository = new TeamRepository(connection);
+        this.teamService = new TeamService(teamRepository);
 
-        this.parserRepository = new ParserRepository(connection);
-        this.parserService = new ParserService(parserRepository);
+        this.playerRepository = new PlayerRepository(connection);
+        this.playerService = new PlayerService(playerRepository);
+        this.userRepository = new UserRepository(connection);
+        this.parserService = new ParserService(gameService, teamService, playerService);
         this.userService = new UserService(userRepository, parserService);
         this.messageHandler = new MessageHandler(userService);
-        log.info("DbManager initialized with UserService and UserRepository.");
+        logger.info("DbManager initialized with UserService and UserRepository.");
     }
 
 

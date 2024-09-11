@@ -12,11 +12,14 @@ import java.sql.SQLException;
 @Builder
 public class User {
     private long telegramId;
+    private String telegramUsername;
+    private boolean roleAdmin;
 
     public static User createNew(ResultSet resultSet){
         try {
             return User.builder()
                     .telegramId(resultSet.getLong("telegram_id"))
+                    .telegramUsername(resultSet.getString("telegram_username"))
                     .build();
         } catch (SQLException e) {
             throw new RuntimeException(e);

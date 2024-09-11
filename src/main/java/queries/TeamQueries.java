@@ -6,8 +6,7 @@ public class TeamQueries {
             "VALUES (?, ?::integer[], ?::integer[], ?::integer[], ?::integer[], ?, ?, ?::numeric)" +
             "ON CONFLICT (team_id, season)" +
             "DO NOTHING;";
-    public static final String CHECK_TEAM_IN_SEASON_EXISTS = "SELECT * FROM team_seasons WHERE team_id = ? and season = ?::numeric";
-
+    public static final String CHECK_TEAM_IN_SEASON_EXISTS = "SELECT * FROM team_seasons WHERE team_id = ? AND season = ?::numeric";
     public static final String UPDATE_INFO_TEAM = "UPDATE team_seasons" +
             " SET" +
             "    points_won = array_cat(team_seasons.points_won, ?::integer[])," +

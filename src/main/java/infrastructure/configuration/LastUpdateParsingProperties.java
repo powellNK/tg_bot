@@ -2,7 +2,6 @@ package infrastructure.configuration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -12,8 +11,9 @@ public class LastUpdateParsingProperties {
     private static final String FILE_PATH = "properties";
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final Logger logger = LoggerFactory.getLogger(LastUpdateParsingProperties.class);
+
     static {
-        // Создать файл конфигурации при загрузке класса, если он не существует
+        // Создать файл конфигурации при загрузке, если он не существует
         createFileIfNotExists();
     }
 

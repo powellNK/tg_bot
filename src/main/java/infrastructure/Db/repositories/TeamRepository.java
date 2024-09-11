@@ -5,10 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import queries.TeamQueries;
-import queries.UserQueries;
-import services.GameService;
-
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -36,7 +32,7 @@ public class TeamRepository {
         }
     }
 
-    //дублирует данные, если запустить повторно
+    //дублирует данные, если запустить повторно? вроде исправила
     public void updateTeam(Team team) {
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement(TeamQueries.UPDATE_INFO_TEAM);

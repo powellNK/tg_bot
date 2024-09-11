@@ -7,7 +7,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,7 +25,7 @@ public class ParserService {
 
     private static final String DATE_END_SEASON2024 = "28.04.2024 00:00";
 
-//    private static final String DATE_END_SEASON2025 = "27.04.2025 00:00";
+    //    private static final String DATE_END_SEASON2025 = "27.04.2025 00:00";
     private static final int DATE_INDEX = 0;
     private static final int TIME_INDEX = 1;
     private static final int TEAM1_INDEX = 3;

@@ -1,9 +1,9 @@
 package infrastructure.Db.repositories;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import domain.User;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;

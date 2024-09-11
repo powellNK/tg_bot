@@ -7,25 +7,23 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import services.*;
-
 import java.sql.Connection;
-
+@Getter
 public class DbManager {
     private final GameRepository gameRepository;
     private final TeamRepository teamRepository;
     private final TeamService teamService;
     private final PlayerRepository playerRepository;
     private final PlayerService playerService;
-    private Connection connection;
+    private final Connection connection;
+    private final UserRepository userRepository;
+    private final UserService userService;
+    private final MessageHandler messageHandler;
+    private final ParserService parserService;
+    private final GameService gameService;
     private final Logger logger = LoggerFactory.getLogger(DbManager.class);
 
-    private UserRepository userRepository;
-    @Getter
-    private UserService userService;
-    private MessageHandler messageHandler;
-    private ParserService parserService;
-    private GameService gameService;
-    ;
+
     public DbManager() {
         this.connection = DbConnectionFactory.createConnection();
         this.gameRepository = new GameRepository(connection);
@@ -40,11 +38,6 @@ public class DbManager {
         this.userService = new UserService(userRepository, parserService);
         this.messageHandler = new MessageHandler(userService);
         logger.info("DbManager initialized with UserService and UserRepository.");
-    }
-
-
-    public MessageHandler getMessageHandler() {
-            return messageHandler;
     }
 }
 

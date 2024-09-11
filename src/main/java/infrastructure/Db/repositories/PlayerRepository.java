@@ -4,7 +4,6 @@ import domain.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import queries.PlayerQueries;
-import queries.TeamQueries;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,16 +21,12 @@ public class PlayerRepository {
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement(PlayerQueries.CREATE_NEW_PLAYER);
 
-            preparedStatement.setShort(1, team.getId());
-            preparedStatement.setNString(2, String.valueOf(team.getPointsWon()));
-            preparedStatement.setNString(3, String.valueOf(team.getSetWon()));
-            preparedStatement.setNString(4, String.valueOf(team.getPointsLost()));
-            preparedStatement.setNString(5, String.valueOf(team.getSetLost()));
-            preparedStatement.setInt(6, team.getWins());
-            preparedStatement.setInt(7, team.getLoses());
-            preparedStatement.setInt(8, team.getSeason());
+            preparedStatement.setString(1, player.getFio());
+            preparedStatement.setInt(2, player.getAge());
+            preparedStatement.setInt(3, player.getGameNumber());
+            preparedStatement.setInt(4, player.getHeight());
+            preparedStatement.setString(5, player.getRole());
             preparedStatement.execute();
-
         } catch (SQLException e) {
             logger.error(e.getMessage());
         }
@@ -48,7 +43,15 @@ public class PlayerRepository {
         return false;
     }
 
-    public void addNewSeasonPlayer(String fio, short teamId, int season) {
-
+    public void addNewSeasonPlayer(Player player) {
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement(PlayerQueries.ADD_NEW_SEASON_PLAYER);
+            preparedStatement.setShort(1, player.getTeam_id());
+            preparedStatement.setInt(2, player.getSeason());
+            preparedStatement.setString(3, player.getFio());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            logger.error(e.getMessage());
+        }
     }
 }

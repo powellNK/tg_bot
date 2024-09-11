@@ -20,7 +20,9 @@ public class TeamService {
     private final Logger logger = LoggerFactory.getLogger(TeamService.class);
 
     public void createTeam(int teamId, String nameTeam) {
-        teamRepository.createTeam(Team.builder().id((short) teamId).title(nameTeam).build());
+        if (!teamRepository.isExistsTeam((short) teamId)) {
+            teamRepository.createTeam(Team.builder().id((short) teamId).title(nameTeam).build());
+        }
     }
 
     public void updateTeam(int teamId, StringBuilder pointWin, StringBuilder teamSetWin, StringBuilder pointLost, StringBuilder teamSetLost, int teamWin, int teamLost, int season) {
@@ -42,6 +44,10 @@ public class TeamService {
             teamRepository.updateTeam(team);
             logger.info("Инфо о команде изменено");
         }
+    }
+
+    public boolean isTeamExistsInSeason(int teamId, int season) {
+        return teamRepository.isExistsTeamInSeason((short) teamId, season);
     }
 }
 

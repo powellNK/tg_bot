@@ -36,14 +36,15 @@ public class TeamRepository {
         }
     }
 
+    //дублирует данные, если запустить повторно
     public void updateTeam(Team team) {
         try {
             final PreparedStatement preparedStatement = connection.prepareStatement(TeamQueries.UPDATE_INFO_TEAM);
 
-            preparedStatement.setNString(1, String.valueOf(team.getPointsWon()));
-            preparedStatement.setNString(2, String.valueOf(team.getSetWon()));
-            preparedStatement.setNString(3, String.valueOf(team.getPointsLost()));
-            preparedStatement.setNString(4, String.valueOf(team.getSetLost()));
+            preparedStatement.setString(1, String.valueOf(team.getPointsWon()));
+            preparedStatement.setString(2, String.valueOf(team.getSetWon()));
+            preparedStatement.setString(3, String.valueOf(team.getPointsLost()));
+            preparedStatement.setString(4, String.valueOf(team.getSetLost()));
             preparedStatement.setInt(5, team.getWins());
             preparedStatement.setInt(6, team.getLoses());
             preparedStatement.setShort(7, team.getId());
@@ -60,10 +61,10 @@ public class TeamRepository {
             final PreparedStatement preparedStatement = connection.prepareStatement(TeamQueries.ADD_TEAM_IN_SEASON);
 
             preparedStatement.setShort(1, team.getId());
-            preparedStatement.setNString(2, String.valueOf(team.getPointsWon()));
-            preparedStatement.setNString(3, String.valueOf(team.getSetWon()));
-            preparedStatement.setNString(4, String.valueOf(team.getPointsLost()));
-            preparedStatement.setNString(5, String.valueOf(team.getSetLost()));
+            preparedStatement.setString(2, String.valueOf(team.getPointsWon()));
+            preparedStatement.setString(3, String.valueOf(team.getSetWon()));
+            preparedStatement.setString(4, String.valueOf(team.getPointsLost()));
+            preparedStatement.setString(5, String.valueOf(team.getSetLost()));
             preparedStatement.setInt(6, team.getWins());
             preparedStatement.setInt(7, team.getLoses());
             preparedStatement.setInt(8, team.getSeason());
@@ -79,6 +80,17 @@ public class TeamRepository {
         try (PreparedStatement statement = connection.prepareStatement(TeamQueries.CHECK_TEAM_IN_SEASON_EXISTS)) {
             statement.setShort(1, teamId);
             statement.setInt(2, season);
+            ResultSet resultSet = statement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            logger.error(e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean isExistsTeam(short teamId) {
+        try (PreparedStatement statement = connection.prepareStatement(TeamQueries.CHECK_TEAM_EXISTS)) {
+            statement.setShort(1, teamId);
             ResultSet resultSet = statement.executeQuery();
             return resultSet.next();
         } catch (SQLException e) {

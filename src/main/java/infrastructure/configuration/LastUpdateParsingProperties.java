@@ -9,9 +9,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 public class LastUpdateParsingProperties {
-    private static final String FILE_PATH = "infrastructure.configuration.properties";
+    private static final String FILE_PATH = "properties";
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final Logger logger = LoggerFactory.getLogger(LastUpdateParsingProperties.class);
+    static {
+        // Создать файл конфигурации при загрузке класса, если он не существует
+        createFileIfNotExists();
+    }
 
     public static void saveLastUpdate(LocalDateTime dateTime) {
         Properties properties = new Properties();
@@ -29,12 +33,31 @@ public class LastUpdateParsingProperties {
         try (InputStream input = new FileInputStream(FILE_PATH)) {
             properties.load(input);
             String dateTimeString = properties.getProperty("lastUpdate");
-            LocalDateTime lastUpdate = LocalDateTime.parse(dateTimeString, formatter);
-            logger.info("Дата последнего обновления загружена: {}", lastUpdate);
-            return LocalDateTime.parse(dateTimeString, formatter);
-        } catch (IOException | NullPointerException e) {
-            logger.warn("Ошибка при загрузке даты последнего обновления, возможно файл не существует", e);
+            if (dateTimeString != null) {
+                LocalDateTime lastUpdate = LocalDateTime.parse(dateTimeString, formatter);
+                logger.info("Дата последнего обновления загружена: {}", lastUpdate);
+                return lastUpdate;
+            } else {
+                logger.warn("Ключ 'lastUpdate' не найден в файле конфигурации");
+                return null;
+            }
+        } catch (IOException e) {
+            logger.error("Ошибка при загрузке файла: {}", FILE_PATH, e);
             return null;
+        }
+    }
+
+    private static void createFileIfNotExists() {
+        File file = new File(FILE_PATH);
+        if (!file.exists()) {
+            try (OutputStream output = new FileOutputStream(file)) {
+                Properties properties = new Properties();
+                properties.setProperty("lastUpdate", null);
+                properties.store(output, "Initial configuration");
+                logger.info("Файл конфигурации был создан: {}", FILE_PATH);
+            } catch (IOException e) {
+                logger.error("Ошибка при создании файла конфигурации", e);
+            }
         }
     }
 }

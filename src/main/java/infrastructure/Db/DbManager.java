@@ -34,7 +34,7 @@ public class DbManager {
         this.teamService = new TeamService(teamRepository);
 
         this.playerRepository = new PlayerRepository(connection);
-        this.playerService = new PlayerService(playerRepository);
+        this.playerService = new PlayerService(playerRepository, teamService);
         this.userRepository = new UserRepository(connection);
         this.parserService = new ParserService(gameService, teamService, playerService);
         this.userService = new UserService(userRepository, parserService);

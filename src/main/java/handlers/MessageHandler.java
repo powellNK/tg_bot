@@ -94,6 +94,7 @@ public class MessageHandler  implements LongPollingSingleThreadUpdateConsumer {
                 break;
             case "DOWNLOAD_UPDATES":
                 userService.parsing();
+                sendMessage(telegramId, "Данные успешно обновлены");
                 break;
             case "SHOW_ALL_GAMES":
                 sendMessage(telegramId, "Показаны все игры");

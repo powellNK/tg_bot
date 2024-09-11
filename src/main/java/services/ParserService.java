@@ -1,6 +1,5 @@
 package services;
 
-import infrastructure.Db.repositories.GameRepository;
 import infrastructure.configuration.LastUpdateParsingProperties;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -26,7 +25,8 @@ public class ParserService {
     private static final String CSS_GAMES2025 = "body > div.page.page--glb > main > div.main-content-internal > div:nth-child(5) > div > table > tbody > tr";
 
     private static final String DATE_END_SEASON2024 = "28.04.2024 00:00";
-    private static final String DATE_END_SEASON2025 = "27.04.2025 00:00";
+
+//    private static final String DATE_END_SEASON2025 = "27.04.2025 00:00";
     private static final int DATE_INDEX = 0;
     private static final int TIME_INDEX = 1;
     private static final int TEAM1_INDEX = 3;
@@ -56,7 +56,6 @@ public class ParserService {
             parsingGames(URL2025, CSS_GAMES2025, 2025, lastUpdate);
             parsingPlayers(2025);
         } else {
-            parsingTeams(URL2025, CSS_TEAMS2025);
             parsingGames(URL2025, CSS_GAMES2025, 2025, lastUpdate);
             parsingPlayers(2025);
         }
@@ -120,8 +119,7 @@ public class ParserService {
             if (text.length() == 1) {
                 return Integer.parseInt(text);
             }
-            int number = Integer.parseInt(text.substring(0, endSub));
-            return number;
+            return Integer.parseInt(text.substring(0, endSub));
         }
         return 0;
     }

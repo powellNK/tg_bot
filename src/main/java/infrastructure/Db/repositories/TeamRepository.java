@@ -5,10 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import queries.TeamQueries;
+import queries.UserQueries;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 public class TeamRepository {
@@ -43,8 +47,10 @@ public class TeamRepository {
             preparedStatement.setString(4, String.valueOf(team.getSetLost()));
             preparedStatement.setInt(5, team.getWins());
             preparedStatement.setInt(6, team.getLoses());
-            preparedStatement.setShort(7, team.getId());
-            preparedStatement.setInt(8, team.getSeason());
+            preparedStatement.setInt(7, team.getPointsPerSeason());
+            preparedStatement.setShort(8, team.getId());
+            preparedStatement.setInt(9, team.getSeason());
+
             preparedStatement.execute();
 
         } catch (SQLException e) {
@@ -64,6 +70,7 @@ public class TeamRepository {
             preparedStatement.setInt(6, team.getWins());
             preparedStatement.setInt(7, team.getLoses());
             preparedStatement.setInt(8, team.getSeason());
+            preparedStatement.setInt(9, team.getPointsPerSeason());
             preparedStatement.execute();
 
         } catch (SQLException e) {
@@ -93,5 +100,23 @@ public class TeamRepository {
             logger.error(e.getMessage());
         }
         return false;
+    }
+
+    public List<Team> getTableResult(int season) {
+        final List<Team> teams = new ArrayList<>();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement(TeamQueries.GET_TABLE_RESULT);
+            preparedStatement.setInt(1, season);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            while (resultSet.next()) {
+                teams.add(Team.createTableResult(resultSet));
+            }
+
+        } catch (SQLException exception) {
+            log.error("SQLException: {}", exception.getMessage());
+        }
+        return teams;
     }
 }

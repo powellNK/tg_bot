@@ -1,5 +1,7 @@
 package handlers;
 
+import domain.Game;
+import domain.Team;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
@@ -16,30 +18,17 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import secrets.SecretManager;
 import services.UserService;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
-public class MessageHandler  implements LongPollingSingleThreadUpdateConsumer {
+public class MessageHandler implements LongPollingSingleThreadUpdateConsumer {
     private final TelegramClient client = new OkHttpTelegramClient(SecretManager.getToken());
     private final Logger logger = LoggerFactory.getLogger(MessageHandler.class);
     private final UserService userService;
-    private static final String YEAR2024 = "2024";
-    private static final String YEAR2025 = "2025";
-    private static final String SHOW_ALL_GAMES = "SHOW_ALL_GAMES";
-    private static final String SHOW_FUTURE_GAMES = "SHOW_FUTURE_GAMES";
-    private static final String SHOW_LAST_GAMES = "SHOW_LAST_GAMES";
-    private static final String DOWNLOAD_UPDATES = "DOWNLOAD_UPDATES";
-    private static final String TEAMS = "TEAMS";
-    private static final String FULL_STATISTICS = "FULL_STATISTICS";
-    private static final String STATISTICS_SEASON_ = "STATISTICS_SEASON_";
-    private static final String SHOW_TEAM_ = "SHOW_TEAM_";
-    private static final String ALL_USERS = "ALL_USERS";
-    private static final String BACK_TO_MENU = "BACK_TO_MENU";
+        private static final int MAX_MESSAGE_LENGTH = 4096;
     private int season;
 
     public MessageHandler(UserService userService) {
@@ -97,16 +86,27 @@ public class MessageHandler  implements LongPollingSingleThreadUpdateConsumer {
                 sendMessage(telegramId, "Данные успешно обновлены");
                 break;
             case "SHOW_ALL_GAMES":
-                sendMessage(telegramId, "Показаны все игры");
+                String allGamesText = getAllGames().toString();
+                sendMessage(telegramId, allGamesText);
+                createMainMenu(telegramId);
                 break;
             case "SHOW_FUTURE_GAMES":
-                sendMessage(telegramId, "Показаны ближайшие игры");
+                String upcomingGamesText = getUpcomingGames().toString();
+                sendMessage(telegramId, upcomingGamesText);
+                createMainMenu(telegramId);
+                break;
+            case "SHOW_LAST_GAMES":
+                String pastGamesText = getPastGames().toString();
+                sendMessage(telegramId, pastGamesText);
+                createMainMenu(telegramId);
                 break;
             case "TEAMS":
                 sendMessage(telegramId, "Команды");
                 break;
-            case "STATISTICS_SEASON_":
-                sendMessage(telegramId, "Статистика сезона");
+            case "RESULT_SEASON":
+                String tableResultText = "<pre>                      ИГРЫ  ПОБЕДЫ  ПОРАЖЕНИЯ ОЧКИ\n" + getTableResult().toString() + "</pre>";
+                sendMessage(telegramId, tableResultText);
+                createMainMenu(telegramId);
                 break;
             case "BACK_TO_MENU":
                 backToMenu(telegramId, messageId, isAdmin);
@@ -119,7 +119,59 @@ public class MessageHandler  implements LongPollingSingleThreadUpdateConsumer {
         }
     }
 
-    private void createTeamMenu(Long telegramId, HashMap<String,Integer> teams) {
+    private StringBuilder getTableResult() {
+        List<Team> teams = userService.getTableResult(season);
+        StringBuilder teamsList = new StringBuilder();
+        if (teams.isEmpty()) {
+            teamsList.append("Команды отсутствуют");
+        } else {
+            for (Team team : teams) {
+                teamsList.append(STR."\{team.toString()}\n ");
+            }
+        }
+        return teamsList;
+    }
+
+    private StringBuilder getPastGames() {
+        List<Game> games = userService.getPastGames(season);
+        StringBuilder gamesList = new StringBuilder();
+        if (games.isEmpty()) {
+            gamesList.append("Игры отсутствуют");
+        } else {
+            for (Game game : games) {
+                gamesList.append(STR."\{game.toString()}\n ");
+            }
+        }
+        return gamesList;
+    }
+
+    private StringBuilder getUpcomingGames() {
+        List<Game> games = userService.getUpcomingGames(season);
+        StringBuilder gamesList = new StringBuilder();
+        if (games.isEmpty()) {
+            gamesList.append("Игры отсутствуют");
+        } else {
+            for (Game game : games) {
+                gamesList.append(STR."\{game.toString()}\n ");
+            }
+        }
+        return gamesList;
+    }
+
+    private StringBuilder getAllGames() {
+        List<Game> games = userService.getAllGames(season);
+        StringBuilder gamesList = new StringBuilder();
+        if (games.isEmpty()) {
+            gamesList.append("Игры отсутствуют");
+        } else {
+            for (Game game : games) {
+                gamesList.append(STR."\{game.toString()}\n ");
+            }
+        }
+        return gamesList;
+    }
+
+    private void createTeamMenu(Long telegramId, HashMap<String, Integer> teams) {
 
     }
 
@@ -152,8 +204,8 @@ public class MessageHandler  implements LongPollingSingleThreadUpdateConsumer {
                 .build());
         userRow2.add(InlineKeyboardButton
                 .builder()
-                .text("Статистика за сезон")
-                .callbackData("STATISTICS_SEASON_")
+                .text("Таблица результатов")
+                .callbackData("RESULT_SEASON")
                 .build());
         userRow2.add(InlineKeyboardButton
                 .builder()
@@ -162,30 +214,29 @@ public class MessageHandler  implements LongPollingSingleThreadUpdateConsumer {
                 .build());
         keyboard.add(userRow2);
 
-        EditMessageReplyMarkup editMessageReplyMarkup  = EditMessageReplyMarkup.builder()
+        EditMessageReplyMarkup editMessageReplyMarkup = EditMessageReplyMarkup.builder()
                 .chatId(telegramId.toString())
                 .messageId(messageId)
                 .replyMarkup(InlineKeyboardMarkup
                         .builder()
                         .keyboard(keyboard).build()).build();
 
-        client.execute(editMessageReplyMarkup );
+        client.execute(editMessageReplyMarkup);
     }
 
 
-private void createMainMenu(Long telegramId) throws TelegramApiException {
-    boolean isAdmin = userService.isAdmin(telegramId);
-    InlineKeyboardMarkup mainKeyboard = createMainKeyboard(isAdmin);
+    private void createMainMenu(Long telegramId) throws TelegramApiException {
+        boolean isAdmin = userService.isAdmin(telegramId);
+        InlineKeyboardMarkup mainKeyboard = createMainKeyboard(isAdmin);
 
 
+        SendMessage sendMessage = SendMessage.builder()
+                .chatId(telegramId.toString())
+                .text("Выберите сезон")
+                .replyMarkup(mainKeyboard).build();
 
-    SendMessage sendMessage = SendMessage.builder()
-            .chatId(telegramId.toString())
-            .text("Выберите сезон")
-            .replyMarkup(mainKeyboard).build();
-
-    client.execute(sendMessage);
-}
+        client.execute(sendMessage);
+    }
 
 
     private void backToMenu(Long chatId, Integer messageId, boolean isAdmin) throws TelegramApiException {
@@ -235,16 +286,43 @@ private void createMainMenu(Long telegramId) throws TelegramApiException {
                 .keyboard(keyboard).build();
     }
 
-    private void sendMessage(Long telegramId, String text) {
-    SendMessage sendMessage = SendMessage.builder()
-            .chatId(telegramId.toString())
-            .text(text)
-            .build();
-    try {
-        client.execute(sendMessage);
-    } catch (TelegramApiException e) {
-        logger.error("Не получилось отправить сообщение: {}", e.getMessage());
-        throw new RuntimeException(e);
+    public void sendMessage(long chatId, String text) {
+        if (text.length() <= MAX_MESSAGE_LENGTH) {
+            if (!text.trim().isEmpty()) {
+                sendShortMessage(chatId, text);
+            }
+        } else {
+            int start = 0;
+            while (start < text.length()) {
+                // индекс следующего символа \n в пределах допустимой длины сообщения
+                int end = Math.min(start + MAX_MESSAGE_LENGTH, text.length());
+                int newlineIndex = text.lastIndexOf(" \n", end);
+
+                if (newlineIndex >= start && newlineIndex <= end) {
+                    end = newlineIndex + 1;
+                }
+
+                String messagePart = text.substring(start, end).trim();
+                if (!messagePart.isEmpty()) {
+                    sendShortMessage(chatId, messagePart);
+                }
+
+                start = end;
+            }
+        }
     }
-}
+
+    private void sendShortMessage(Long telegramId, String text) {
+        SendMessage sendMessage = SendMessage.builder()
+                .chatId(telegramId.toString())
+                .text(text)
+                .parseMode("HTML")
+                .build();
+        try {
+            client.execute(sendMessage);
+        } catch (TelegramApiException e) {
+            logger.error("Не получилось отправить сообщение: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
 }

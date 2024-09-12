@@ -35,7 +35,7 @@ public class DbManager {
         this.playerService = new PlayerService(playerRepository, teamService);
         this.userRepository = new UserRepository(connection);
         this.parserService = new ParserService(gameService, teamService, playerService);
-        this.userService = new UserService(userRepository, parserService);
+        this.userService = new UserService(userRepository, parserService, gameService, teamService ,playerService);
         this.messageHandler = new MessageHandler(userService);
         logger.info("DbManager initialized with UserService and UserRepository.");
     }

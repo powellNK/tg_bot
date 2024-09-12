@@ -1,9 +1,12 @@
 package infrastructure.Db.repositories;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import domain.Game;
+import domain.Team;
 import domain.User;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -14,6 +17,7 @@ import queries.UserQueries;
 public class UserRepository {
     private final Connection connection;
     private final Logger logger = LoggerFactory.getLogger(UserRepository.class);
+
     public UserRepository(Connection connection) {
         this.connection = connection;
     }
@@ -55,4 +59,7 @@ public class UserRepository {
             logger.error(e.getMessage());
         }
     }
+
 }
+
+

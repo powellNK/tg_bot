@@ -45,6 +45,8 @@ public class ParserService {
         this.playerService = playerService;
     }
 
+
+    //если экстренно прервать, а потом успешно загрузить, то некоторые данные дублируются
     public void parsing() throws IOException {
         LocalDateTime lastUpdate = LastUpdateParsingProperties.loadLastUpdate();
         if (lastUpdate == null || lastUpdate.isBefore(getFormattedDateTime(DATE_END_SEASON2024))) {
@@ -155,6 +157,8 @@ public class ParserService {
                 StringBuilder team1SetLost = new StringBuilder();
                 StringBuilder team2SetWin = new StringBuilder();
                 StringBuilder team2SetLost = new StringBuilder();
+                int team1PointsPerSeason = 0;
+                int team2PointsPerSeason = 0;
                 int team1Win = 0, team2Win = 0, team1Lost = 0, team2Lost = 0;
                 if (setScores[0] > setScores[1]) {
                     team1Win = 1;
@@ -171,6 +175,22 @@ public class ParserService {
                     team2SetWin.append(STR."{\{setScores[1]}}");
                     team1SetLost.append(STR."{\{setScores[1]}}");
                 }
+
+                if (setScores[0] + setScores[1] == 5) {
+                    if (team1Win == 1) {
+                        team1PointsPerSeason = 2;
+                        team2PointsPerSeason = 1;
+                    } else {
+                        team1PointsPerSeason = 1;
+                        team2PointsPerSeason = 2;
+                    }
+                } else {
+                    if (team1Win == 1) {
+                        team1PointsPerSeason = 3;
+                    } else {
+                        team2PointsPerSeason = 3;
+                    }
+                }
                 // *конец*
 
                 //Забитые и пропущенные очки обеих команд
@@ -185,12 +205,12 @@ public class ParserService {
                 appendPoints(pointTeam2Lost, pointsScores, true);
                 // *конец*
 
-                teamService.updateTeam(team1Id, pointTeam1Win, team1SetWin, pointTeam1Lost, team1SetLost, team1Win, team1Lost, season);
-                teamService.updateTeam(team2Id, pointTeam2Win, team2SetWin, pointTeam2Lost, team2SetLost, team2Win, team2Lost, season);
+                teamService.updateTeam(team1Id, pointTeam1Win, team1SetWin, pointTeam1Lost, team1SetLost, team1Win, team1Lost, team1PointsPerSeason,season);
+                teamService.updateTeam(team2Id, pointTeam2Win, team2SetWin, pointTeam2Lost, team2SetLost, team2Win, team2Lost, team2PointsPerSeason,season);
                 gameService.createGame(dateTime, team1Id, team2Id, resultPoints, resultSet, season);
             } else {
-                teamService.updateTeam(team1Id, new StringBuilder("{}"), new StringBuilder("{}"), new StringBuilder("{}"), new StringBuilder("{}"), 0, 0, season);
-                teamService.updateTeam(team2Id, new StringBuilder("{}"), new StringBuilder("{}"), new StringBuilder("{}"), new StringBuilder("{}"), 0, 0, season);
+                teamService.updateTeam(team1Id, new StringBuilder("{}"), new StringBuilder("{}"), new StringBuilder("{}"), new StringBuilder("{}"), 0, 0, 0, season);
+                teamService.updateTeam(team2Id, new StringBuilder("{}"), new StringBuilder("{}"), new StringBuilder("{}"), new StringBuilder("{}"), 0, 0, 0, season);
                 gameService.createGame(dateTime, team1Id, team2Id, "", "", season);
             }
 

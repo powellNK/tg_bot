@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 @Slf4j
 @Getter
 public class TeamService {
@@ -25,7 +27,7 @@ public class TeamService {
         }
     }
 
-    public void updateTeam(int teamId, StringBuilder pointWin, StringBuilder teamSetWin, StringBuilder pointLost, StringBuilder teamSetLost, int teamWin, int teamLost, int season) {
+    public void updateTeam(int teamId, StringBuilder pointWin, StringBuilder teamSetWin, StringBuilder pointLost, StringBuilder teamSetLost, int teamWin, int teamLost, int pointsPerSeason, int season) {
         short teamIdSh = (short) teamId;
         Team team = Team.builder().
                 id(teamIdSh).
@@ -36,6 +38,7 @@ public class TeamService {
                 wins(teamWin).
                 loses(teamLost).
                 season(season).
+                pointsPerSeason(pointsPerSeason).
                 build();
         if (!teamRepository.isExistsTeamInSeason(teamIdSh, season)) {
             teamRepository.addTeamInSeason(team);
@@ -49,5 +52,10 @@ public class TeamService {
     public boolean isTeamExistsInSeason(int teamId, int season) {
         return teamRepository.isExistsTeamInSeason((short) teamId, season);
     }
+
+    public List<Team> getTableResult(int season) {
+        return teamRepository.getTableResult(season);
+    }
+
 }
 

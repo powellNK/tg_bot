@@ -1,13 +1,18 @@
 package infrastructure.Db.repositories;
 
 import domain.Player;
+import domain.Team;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import queries.PlayerQueries;
+import queries.TeamQueries;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerRepository {
     private final Connection connection;
@@ -52,5 +57,24 @@ public class PlayerRepository {
         } catch (SQLException e) {
             logger.error(e.getMessage());
         }
+    }
+
+    public List<Player> getPlayers(int season, short teamId) {
+        final List<Player> players = new ArrayList<>();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement(PlayerQueries.GET_PLAYERS);
+            preparedStatement.setInt(1, season);
+            preparedStatement.setShort(2, teamId);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            while (resultSet.next()) {
+                players.add(Player.createPlayer(resultSet));
+            }
+
+        } catch (SQLException exception) {
+            logger.error("SQLException: {}", exception.getMessage());
+        }
+        return players;
     }
 }

@@ -46,4 +46,7 @@ public class GameService {
     public List<Game> getUpcomingGames(int season) {
         return gameRepository.getUpcomingGames(season);
     }
+
+    public List<Game> getGamesTeam(int season, short teamId) { return gameRepository.getGamesTeam(season,teamId);
+    }
 }

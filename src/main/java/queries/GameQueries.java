@@ -21,4 +21,9 @@ public class GameQueries {
             " JOIN teams t2 ON games.team2_id = t2.team_id" +
             " WHERE season = ?::numeric " +
             " AND games.date_time < ? ;";
+    public static final String GET_GAMES_TEAM = "SELECT game_id,games.date_time, t1.title AS team1_title, t2.title AS team2_title, team1_id, team2_id, points, sets, season" +
+            " FROM games" +
+            " JOIN teams t1 ON games.team1_id = t1.team_id" +
+            " JOIN teams t2 ON games.team2_id = t2.team_id" +
+            " WHERE season = ?::numeric AND (games.team1_id = ? OR games.team2_id = ?);";
 }

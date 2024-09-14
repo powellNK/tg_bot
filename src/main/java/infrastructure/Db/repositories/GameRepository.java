@@ -93,4 +93,23 @@ public class GameRepository {
         return games;
     }
 
+    public List<Game> getGamesTeam(int season, short teamId) {
+        final List<Game> games = new ArrayList<>();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement(GameQueries.GET_GAMES_TEAM);
+            preparedStatement.setInt(1, season);
+            preparedStatement.setShort(2, teamId);
+            preparedStatement.setShort(3, teamId);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            while (resultSet.next()) {
+                games.add(Game.createGame(resultSet));
+            }
+
+        } catch (SQLException exception) {
+            logger.error("SQLException: {}", exception.getMessage());
+        }
+        return games;
+    }
 }

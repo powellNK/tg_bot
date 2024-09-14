@@ -1,7 +1,9 @@
 package handlers;
 
 import domain.Game;
+import domain.Player;
 import domain.Team;
+import domain.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
@@ -20,7 +22,6 @@ import secrets.SecretManager;
 import services.UserService;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 
@@ -28,7 +29,7 @@ public class MessageHandler implements LongPollingSingleThreadUpdateConsumer {
     private final TelegramClient client = new OkHttpTelegramClient(SecretManager.getToken());
     private final Logger logger = LoggerFactory.getLogger(MessageHandler.class);
     private final UserService userService;
-        private static final int MAX_MESSAGE_LENGTH = 4096;
+    private static final int MAX_MESSAGE_LENGTH = 4096;
     private int season;
 
     public MessageHandler(UserService userService) {
@@ -101,22 +102,159 @@ public class MessageHandler implements LongPollingSingleThreadUpdateConsumer {
                 createMainMenu(telegramId);
                 break;
             case "TEAMS":
-                sendMessage(telegramId, "Команды");
+                createMenuWithAllTeams(telegramId,messageId);
                 break;
             case "RESULT_SEASON":
-                String tableResultText = "<pre>                      ИГРЫ  ПОБЕДЫ  ПОРАЖЕНИЯ ОЧКИ\n" + getTableResult().toString() + "</pre>";
+                String tableResultText = "<pre>                      ИГРЫ  ПОБЕДЫ  ПОРАЖЕНИЯ ОЧКИ\n" + getTableResult() + "</pre>";
                 sendMessage(telegramId, tableResultText);
                 createMainMenu(telegramId);
                 break;
             case "BACK_TO_MENU":
                 backToMenu(telegramId, messageId, isAdmin);
                 break;
-//            case "SHOW_TEAM_":
-//                HashMap <String,int> teams = userService.getTeam();
-//                createTeamMenu(telegramId, teams);
-//                break;
+            case "BACK_TO_MENU_SEASON":
+                createMenuSeason(telegramId, messageId);
+                break;
+            case "FULL_STATISTICS":
+                String fullStatisticsText = getFullStatistic().toString();
+                sendMessage(telegramId, fullStatisticsText);
+                createMainMenu(telegramId);
+                break;
+            case "SHOW_USERS":
+                String allUsersText = getUsers().toString();
+                sendMessage(telegramId, allUsersText);
+                createMainMenu(telegramId);
+
+            default:
+                if (callbackData.startsWith("SHOWTEAM_")) {                    // Достать id команды
+                    String teamId = callbackData.split("_")[1];
+                    createMenuForSpecificTeam(telegramId, messageId, teamId);
+                } else if (callbackData.startsWith("GAMES_")) {                       //  Информация об играх команды
+                    String teamId = callbackData.split("_")[1];
+                    String gamesTeamText = getGamesTeam(teamId).toString();
+                    sendMessage(telegramId, gamesTeamText);
+                    createMainMenu(telegramId);
+                } else if (callbackData.startsWith("STATISTICS_")) {                  // Статистика команды
+                    String teamId = callbackData.split("_")[1];
+                    String statisticsTeamText = getStatisticsTeam(teamId).toString();
+                    sendMessage(telegramId, statisticsTeamText);
+                    createMainMenu(telegramId);
+                } else if (callbackData.startsWith("ROSTER_")) {                      // Состав команды
+                    String teamId = callbackData.split("_")[1];
+                    String playersTeamText = getPlayers(teamId).toString();
+                    sendMessage(telegramId, playersTeamText);
+                    createMainMenu(telegramId);
+                } else {
+                    // Обработка неизвестного callbackData
+                    System.out.println("Неизвестный callbackData: " + callbackData);
+                }
+                break;
 
         }
+    }
+
+    private StringBuilder getUsers() {
+        List<User> users = userService.getUsers();
+        StringBuilder usersList = new StringBuilder();
+        if (users.isEmpty()) {
+            usersList.append("Пользователи отсутствуют");
+        } else {
+            for (User user : users) {
+                usersList.append(STR."\{user.toString()}\n ");
+            }
+        }
+        return usersList;
+    }
+
+    private StringBuilder getFullStatistic() {
+        List<Team> teams = userService.getFullStatistic();
+        StringBuilder teamsList = new StringBuilder();
+        if (teams.isEmpty()) {
+            teamsList.append("Команда отсутствует");
+        } else {
+            for (Team team : teams) {
+                teamsList.append(STR."\{team.toString()}\n ");
+            }
+        }
+        return teamsList;
+    }
+
+    private StringBuilder getPlayers(String teamId) {
+        List<Player> players = userService.getPlayers(season, Short.parseShort(teamId));
+        StringBuilder playersList = new StringBuilder();
+        if (players.isEmpty()) {
+            playersList.append("Игроки отсутствуют");
+        } else {
+            for (Player player : players) {
+                playersList.append(STR."\{player.toString()}");
+            }
+        }
+        return playersList;
+    }
+
+    private StringBuilder getStatisticsTeam(String teamId) {
+        List<Team> teams = userService.getStatisticsTeam(season, Short.parseShort(teamId));
+        StringBuilder teamsList = new StringBuilder();
+        if (teams.isEmpty()) {
+            teamsList.append("Команда отсутствует");
+        } else {
+            for (Team team : teams) {
+                teamsList.append(STR."\{team.toString()}\n ");
+            }
+        }
+        return teamsList;
+    }
+
+    private StringBuilder getGamesTeam(String teamId) {
+        List<Game> games = userService.getGamesTeam(season, Short.parseShort(teamId));
+        StringBuilder gamesList = new StringBuilder();
+        if (games.isEmpty()) {
+            gamesList.append("Игры отсутствуют");
+        } else {
+            for (Game game : games) {
+                gamesList.append(STR."\{game.toString()}\n ");
+            }
+        }
+        return gamesList;
+
+    }
+
+    private void createMenuForSpecificTeam (Long telegramId, Integer messageId, String teamId) throws TelegramApiException {
+        List<InlineKeyboardRow> keyboard = new ArrayList<>();
+
+        InlineKeyboardRow userRow1 = new InlineKeyboardRow();
+        userRow1.add(InlineKeyboardButton
+                .builder()
+                .text("Игры и результаты команды")
+                .callbackData("GAMES_" + teamId)
+                .build());
+        userRow1.add(InlineKeyboardButton
+                .builder()
+                .text("Статистика")
+                .callbackData("STATISTICS_" + teamId)
+                .build());
+        keyboard.add(userRow1);
+        InlineKeyboardRow userRow2 = new InlineKeyboardRow();
+        userRow2.add(InlineKeyboardButton
+                .builder()
+                .text("Состав")
+                .callbackData("ROSTER_" + teamId)
+                .build());
+        userRow2.add(InlineKeyboardButton
+                .builder()
+                .text("Вернуться")
+                .callbackData("TEAMS")
+                .build());
+        keyboard.add(userRow2);
+
+        EditMessageReplyMarkup editMessageReplyMarkup = EditMessageReplyMarkup.builder()
+                .chatId(telegramId.toString())
+                .messageId(messageId)
+                .replyMarkup(InlineKeyboardMarkup
+                        .builder()
+                        .keyboard(keyboard).build()).build();
+
+        client.execute(editMessageReplyMarkup);
     }
 
     private StringBuilder getTableResult() {
@@ -125,8 +263,9 @@ public class MessageHandler implements LongPollingSingleThreadUpdateConsumer {
         if (teams.isEmpty()) {
             teamsList.append("Команды отсутствуют");
         } else {
+            int i = 0;
             for (Team team : teams) {
-                teamsList.append(STR."\{team.toString()}\n ");
+                teamsList.append(STR."\{++i}. \{team.toString()}\n ");
             }
         }
         return teamsList;
@@ -171,8 +310,50 @@ public class MessageHandler implements LongPollingSingleThreadUpdateConsumer {
         return gamesList;
     }
 
-    private void createTeamMenu(Long telegramId, HashMap<String, Integer> teams) {
+    private void createMenuWithAllTeams(Long telegramId, Integer messageId) throws TelegramApiException {
+        List<Team> teams = userService.getTeamsFromSeason(telegramId, season);
 
+        List<InlineKeyboardRow> keyboard = new ArrayList<>();
+        InlineKeyboardRow row = new InlineKeyboardRow();
+
+        for (int i = 0; i < teams.size(); i++) {
+            Team team = teams.get(i);
+
+            InlineKeyboardButton teamButton = InlineKeyboardButton.builder()
+                    .text(team.getTitle())
+                    .callbackData("SHOWTEAM_" + team.getId())
+                    .build();
+
+            row.add(teamButton);
+
+            if ((i+1) % 2 == 0 || i == teams.size() - 1) {
+                keyboard.add(row);
+                row = new InlineKeyboardRow();
+            }
+        }
+        if (!keyboard.isEmpty() && keyboard.getLast().size() == 1) {
+            InlineKeyboardButton backButton = InlineKeyboardButton.builder()
+                    .text("Вернуться")
+                    .callbackData("BACK_TO_MENU_SEASON")
+                    .build();
+            keyboard.getLast().add(backButton);
+        } else {
+            InlineKeyboardRow backRow = new InlineKeyboardRow();
+            InlineKeyboardButton backButton = InlineKeyboardButton.builder()
+                    .text("Вернуться")
+                    .callbackData("BACK_TO_MENU_SEASON")
+                    .build();
+            backRow.add(backButton);
+            keyboard.add(backRow);
+        }
+        EditMessageReplyMarkup editMessageReplyMarkup = EditMessageReplyMarkup.builder()
+                .chatId(telegramId.toString())
+                .messageId(messageId)
+                .replyMarkup(InlineKeyboardMarkup
+                        .builder()
+                        .keyboard(keyboard).build()).build();
+
+        client.execute(editMessageReplyMarkup);
     }
 
     private void createMenuSeason(Long telegramId, Integer messageId) throws TelegramApiException {
@@ -280,6 +461,12 @@ public class MessageHandler implements LongPollingSingleThreadUpdateConsumer {
                     .callbackData("DOWNLOAD_UPDATES")
                     .build());
             keyboard.add(adminRow);
+            InlineKeyboardRow adminRow2 = new InlineKeyboardRow();
+            adminRow.add(InlineKeyboardButton.builder()
+                    .text("Пользователи")
+                    .callbackData("SHOW_USERS")
+                    .build());
+            keyboard.add(adminRow2);
         }
         return InlineKeyboardMarkup
                 .builder()

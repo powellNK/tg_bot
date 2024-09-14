@@ -8,4 +8,7 @@ public class PlayerQueries {
             "FROM players " +
             "WHERE players.fio = ?" +
             "ON CONFLICT (player_id, team_id, season) DO NOTHING;";
+    public static final String GET_PLAYERS = "SELECT fio, age, players.game_number, players.height, role FROM players" +
+            " JOIN player_seasons USING (player_id)" +
+            " WHERE season = ? and team_id = ?";
 }

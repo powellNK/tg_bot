@@ -11,6 +11,7 @@ import domain.User;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import queries.TeamQueries;
 import queries.UserQueries;
 
 @Slf4j
@@ -60,6 +61,22 @@ public class UserRepository {
         }
     }
 
+    public List<User> getUsers() {
+        final List<User> users = new ArrayList<>();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement(UserQueries.GET_ALL_USERS);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                users.add(User.createNew(resultSet));
+            }
+
+        } catch (SQLException exception) {
+            log.error("SQLException: {}", exception.getMessage());
+        }
+        return users;
+    }
 }
+
 
 

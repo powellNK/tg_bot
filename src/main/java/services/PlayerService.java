@@ -5,6 +5,8 @@ import infrastructure.Db.repositories.PlayerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 public class PlayerService {
     private final PlayerRepository playerRepository;
     private final TeamService teamService;
@@ -32,6 +34,10 @@ public class PlayerService {
 
     private boolean isPlayerExists(String fio) {
         return playerRepository.isPlayerExists(Player.builder().fio(fio).build());
+    }
+
+    public List<Player> getPlayers(int season, short teamId) {
+        return playerRepository.getPlayers(season, teamId);
     }
 }
 

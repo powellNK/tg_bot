@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
@@ -24,5 +25,10 @@ public class User {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return telegramId + "   @" + telegramUsername;
     }
 }

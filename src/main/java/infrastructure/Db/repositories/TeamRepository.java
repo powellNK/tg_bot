@@ -1,5 +1,6 @@
 package infrastructure.Db.repositories;
 
+import domain.Game;
 import domain.Team;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -112,6 +113,61 @@ public class TeamRepository {
 
             while (resultSet.next()) {
                 teams.add(Team.createTableResult(resultSet));
+            }
+
+        } catch (SQLException exception) {
+            log.error("SQLException: {}", exception.getMessage());
+        }
+        return teams;
+    }
+
+    public List<Team> getTeamsFromSeason(int season) {
+        final List<Team> teams = new ArrayList<>();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement(TeamQueries.GET_TEAMS_FROM_SEASON);
+            preparedStatement.setInt(1, season);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            while (resultSet.next()) {
+                teams.add(Team.createTeam(resultSet));
+            }
+
+        } catch (SQLException exception) {
+            log.error("SQLException: {}", exception.getMessage());
+        }
+        return teams;
+    }
+
+    public List<Team> getStatisticsTeam(int season, short teamId) {
+        final List<Team> teams = new ArrayList<>();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement(TeamQueries.GET_STATISTICS_TEAM_IN_SEASON);
+            preparedStatement.setInt(2, season);
+            preparedStatement.setShort(1, teamId);
+
+            final ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            while (resultSet.next()) {
+                teams.add(Team.createFullStats(resultSet));
+            }
+
+        } catch (SQLException exception) {
+            log.error("SQLException: {}", exception.getMessage());
+        }
+        return teams;
+    }
+
+    public List<Team> getFullStatistic() {
+        final List<Team> teams = new ArrayList<>();
+        try {
+            final PreparedStatement preparedStatement = connection.prepareStatement(TeamQueries.GET_FULL_STATISTICS);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            while (resultSet.next()) {
+                teams.add(Team.createFullStats(resultSet));
             }
 
         } catch (SQLException exception) {

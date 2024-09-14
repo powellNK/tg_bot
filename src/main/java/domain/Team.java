@@ -26,10 +26,11 @@ public class Team {
     private double avgSetWon;
     private double avgPointsLost;
     private double avgSetLost;
-    private double minPointsWon;
-    private double minPointsLost;
+    private int minPointsWon;
+    private int minPointsLost;
     private int countGames;
     private int season;
+    private boolean showFullStats;
 
 
     public static Team createTableResult(ResultSet resultSet) {
@@ -40,6 +41,38 @@ public class Team {
                     .wins(resultSet.getInt("wins"))
                     .loses(resultSet.getInt("loses"))
                     .pointsPerSeason(resultSet.getInt("points_per_season"))
+                    .showFullStats(false)
+                    .build();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Team createTeam(ResultSet resultSet) {
+        try {
+            return Team.builder()
+                    .id(resultSet.getShort("team_id"))
+                    .title(resultSet.getString("title"))
+                    .build();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Team createFullStats(ResultSet resultSet) {
+        try {
+            return Team.builder()
+                    .title(resultSet.getString("title"))
+                    .wins(resultSet.getInt("wins"))
+                    .loses(resultSet.getInt("loses"))
+                    .pointsPerSeason(resultSet.getInt("points_per_season"))
+                    .avgPointsWon(resultSet.getDouble("avg_point_won"))
+                    .avgPointsLost(resultSet.getDouble("avg_point_lost"))
+                    .avgSetWon(resultSet.getDouble("avg_set_won"))
+                    .avgSetLost(resultSet.getDouble("avg_set_lost"))
+                    .minPointsWon(resultSet.getInt("min_points_won"))
+                    .minPointsLost(resultSet.getInt("min_points_lost"))
+                    .showFullStats(true)
                     .build();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -48,7 +81,10 @@ public class Team {
 
     @Override
     public String toString() {
-        return STR."\{title}\n                        \{countGames}      \{wins}      \{loses}      \{pointsPerSeason}";
+        if (showFullStats) {
+            return STR."<pre>            \{title} </pre>\n Победы: \{wins}  Поражения: \{loses}\n Очки: \{pointsPerSeason} Количество игр: \{wins+loses} \n Среднее количество выигранных очков: \{avgPointsWon}\n Среднее количество проигранных очков: \{avgPointsLost}\n Среднее количество выигранных сетов: \{avgSetWon}\n Среднее количество проигранных сетов: \{avgSetLost}\n Минимальное количество выигранных очков: \{minPointsWon}\n Минимальное количество проигранных очков: \{minPointsLost}";
+        } else {
+            return STR."\{title}\n                        \{countGames}      \{wins}      \{loses}      \{pointsPerSeason}";
+        }
     }
-//    <pre>
 }

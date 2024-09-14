@@ -1,5 +1,6 @@
 package services;
 
+import domain.Game;
 import domain.Team;
 import infrastructure.Db.repositories.TeamRepository;
 import lombok.Getter;
@@ -57,5 +58,16 @@ public class TeamService {
         return teamRepository.getTableResult(season);
     }
 
+    public List<Team> getTeamsFromSeason(int season) {
+        return teamRepository.getTeamsFromSeason(season);
+    }
+
+    public List<Team> getStatisticsTeam(int season, short teamId) {
+        return teamRepository.getStatisticsTeam(season,teamId);
+    }
+
+    public List<Team> getFullStatistic() {
+        return teamRepository.getFullStatistic();
+    }
 }
 

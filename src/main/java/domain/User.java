@@ -6,7 +6,6 @@ import lombok.Setter;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
@@ -29,6 +28,6 @@ public class User {
 
     @Override
     public String toString() {
-        return telegramId + "   @" + telegramUsername;
+        return STR."\{telegramId}   @\{telegramUsername}";
     }
 }

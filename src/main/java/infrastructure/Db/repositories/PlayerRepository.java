@@ -1,12 +1,9 @@
 package infrastructure.Db.repositories;
 
 import domain.Player;
-import domain.Team;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import queries.PlayerQueries;
-import queries.TeamQueries;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

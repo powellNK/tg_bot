@@ -1,12 +1,9 @@
 package infrastructure.Db.repositories;
 
 import domain.Game;
-import domain.Team;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import queries.GameQueries;
-import queries.UserQueries;
-
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

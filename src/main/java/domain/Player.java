@@ -3,10 +3,8 @@ package domain;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter

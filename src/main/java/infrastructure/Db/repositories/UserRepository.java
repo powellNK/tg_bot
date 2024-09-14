@@ -1,17 +1,12 @@
 package infrastructure.Db.repositories;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import domain.Game;
-import domain.Team;
 import domain.User;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import queries.TeamQueries;
 import queries.UserQueries;
 
 @Slf4j

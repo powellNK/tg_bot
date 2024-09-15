@@ -38,7 +38,7 @@ public class Game {
     }
     @Override
     public String toString() {
-        return STR."<pre>\{dateTime.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"))}\n\{team1Title} - \{team2Title}\n   \{setResult}   \{pointResult}   Сезон: \{season}</pre> \n";
+        return STR."\{dateTime.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"))}\n\{team1Title} - \{team2Title}\n   \{setResult}   \{pointResult}   Сезон: \{season}\n";
     }
 
 }

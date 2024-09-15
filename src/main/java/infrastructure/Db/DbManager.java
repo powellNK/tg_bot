@@ -7,6 +7,8 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import services.*;
+import state.UserState;
+
 import java.sql.Connection;
 @Getter
 public class DbManager {
@@ -34,6 +36,7 @@ public class DbManager {
         this.playerRepository = new PlayerRepository(connection);
         this.playerService = new PlayerService(playerRepository, teamService);
         this.userRepository = new UserRepository(connection);
+
         this.parserService = new ParserService(gameService, teamService, playerService);
         this.userService = new UserService(userRepository, parserService, gameService, teamService ,playerService);
         this.messageHandler = new MessageHandler(userService);
